@@ -13,11 +13,33 @@
   "menu": [
     {
       "name": "Swap all matches",
-      "command": "swapp-all"
+      "command": "swap-all"
+    },
+    { "separator": true },
+    {
+      "name": "Manual per page",
+      "command": "swap-manual-by-page",
+      "parameters": [
+        {
+          "name": "Style",
+          "key": "style-name",
+          "description": "Enter a style name you want to swap"
+        },
+        {
+          "name": "Collection",
+          "key": "collection-name",
+          "description": "Enter a variable collection name"
+        },
+        {
+          "name": "Variable",
+          "key": "variable-name",
+          "description": "Enter a variable name"
+        }
+      ]
     },
     {
-      "name": "Swap by name",
-      "command": "swap-manual",
+      "name": "Manual per file",
+      "command": "swap-manual-by-file",
       "parameters": [
         {
           "name": "Style",

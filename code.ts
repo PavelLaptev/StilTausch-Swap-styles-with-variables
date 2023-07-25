@@ -1,31 +1,11 @@
-// Check that the input is a valid number
-// function setSuggestionsForNumberInput(
-//   query: string,
-//   result: SuggestionResults,
-//   completions?: string[]
-// ) {
-//   if (query === "") {
-//     result.setSuggestions(completions ?? []);
-//   } else if (!Number.isFinite(Number(query))) {
-//     result.setError("Please enter a numeric value");
-//   } else if (Number(query) <= 0) {
-//     result.setError("Must be larger than 0");
-//   } else {
-//     const filteredCompletions = completions
-//       ? completions.filter((s) => s.includes(query) && s !== query)
-//       : [];
-//     result.setSuggestions([query, ...filteredCompletions]);
-//   }
-// }
-
 const init = async () => {
   figma.skipInvisibleInstanceChildren = true;
+
   let variablesSuggestions: string[] = [];
-  const variableCollections =
-    await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
   let collection: LibraryVariableCollection | undefined;
 
-  // console.log(findAllColorStylesInDocument());
+  const variableCollections =
+    await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
 
   // The 'input' event listens for text change in the Quick Actions box after a plugin is 'Tabbed' into.
   figma.parameters.on(
@@ -60,13 +40,6 @@ const init = async () => {
       }
 
       if (key === "variable-name") {
-        // result.setSuggestions([query]);
-        // const filteredSuggestions = variablesSuggestions.filter((s) =>
-        //   s.includes(query)
-        // );
-        // result.setSuggestions(filteredSuggestions);
-        // variableCollections[
-
         const filteredSuggestions = variablesSuggestions.filter((s) =>
           s.includes(query)
         );
@@ -78,44 +51,53 @@ const init = async () => {
 
   // When the user presses Enter after inputting all parameters, the 'run' event is fired.
   figma.on("run", async ({ command, parameters }: RunEvent) => {
-    if (command == "swapp-all") {
+    if (command === "swap-all") {
       swapAll(parameters as ParameterValues);
-    } else {
-      await swapManual(parameters as ParameterValues);
     }
-    figma.closePlugin();
+    if (command === "swap-manual-by-page") {
+      await swapManual(parameters as ParameterValues, true);
+    }
+    if (command === "swap-manual-by-file") {
+      await swapManual(parameters as ParameterValues, false);
+    }
   });
 
+  //////////////
+  // SWAP ALL //
+  //////////////
   const swapAll = (parameters: ParameterValues) => {
     console.log(parameters);
   };
 
-  const swapManual = async (parameters: ParameterValues) => {
-    const allNodes = figma.root.findAll();
+  /////////////////
+  // MANUAL SWAP //
+  /////////////////
+  const swapManual = async (parameters: ParameterValues, byPage: boolean) => {
+    const allCurrentPageNodes = figma.currentPage.findAll();
+
+    console.log("allCurrentPageNodes", allCurrentPageNodes);
+
+    const allAllowedNodes = allCurrentPageNodes.filter((node: any) => {
+      if (
+        !node.fillStyleId ||
+        typeof node.fillStyleId !== "string" ||
+        node.type === "INSTANCE"
+      ) {
+        return false;
+      }
+
+      return true;
+    });
 
     // COLOR STYLES
-    const allMatchedColorStyles = allNodes.filter((node: any) => {
-      if (typeof node.fillStyleId !== "string") {
-        return false;
-      }
-
-      if (node.type === "INSTANCE") {
-        return false;
-      }
-
+    const allMatchedColorStyles = allAllowedNodes.filter((node: any) => {
       const styleId = node.fillStyleId;
       const styleName = figma.getStyleById(styleId)?.name;
-
-      // console.log(styleName);
-
-      if (styleName === undefined) {
-        return false;
-      }
 
       return styleName === parameters["style-name"];
     });
 
-    console.log("allMatchedColorStyles", allMatchedColorStyles);
+    // console.log("allMatchedColorStyles", allMatchedColorStyles);
 
     if (allMatchedColorStyles.length === 0) {
       figma.notify("No matching styles in the file", {
@@ -160,8 +142,12 @@ const init = async () => {
       teamVariable.key
     );
 
-    allMatchedColorStyles.forEach((node: any) => {
+    let swappedStylesCount = 0;
+
+    allMatchedColorStyles.forEach(async (node: any) => {
       const fillsCopy = JSON.parse(JSON.stringify(node.fills));
+
+      // console.log("fillsCopy", fillsCopy);
 
       fillsCopy[0] = figma.variables.setBoundVariableForPaint(
         fillsCopy[0],
@@ -169,52 +155,22 @@ const init = async () => {
         importedVariable
       );
 
-      node.fills = fillsCopy;
+      // console.log("fillsCopy", fillsCopy);
+      console.log("node", node.fills);
+
+      node.fills = await fillsCopy;
+
+      swappedStylesCount++;
     });
 
-    figma.notify(`Swapped ${allMatchedColorStyles.length} styles! 🎉`, {
+    // SUCCESS
+    const successMessage = `Swapped ${swappedStylesCount} from ${allMatchedColorStyles.length} styles! 🎉`;
+    figma.notify(successMessage, {
       timeout: 3000
     });
-
-    // console.log(variable);
-
-    // console.log(allMatchedColorStyles);
-
-    // const collections =
-    //   figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
-    // // const collectionName = parameters["collection-name"];
-
-    // console.log(collections);
-
-    // console.log(allMatchedColorStyles);
-
-    // allNodes.forEach((node) => {
-    //   if (node.fillStyleId === styleName) {
-    //     node.fillStyleId = variableName;
-    //   }
-    // });
+    console.log(successMessage);
+    figma.closePlugin();
   };
 };
 
 init();
-
-// function resizeRelative(parameters: ParameterValues) {
-//   const scale = parseFloat(parameters.scale);
-
-//   for (const node of figma.currentPage.selection) {
-//     if ("rescale" in node) {
-//       node.rescale(scale);
-//     }
-//   }
-// }
-
-// function resizeAbsolute(parameters: ParameterValues) {
-//   const width = parseInt(parameters.width);
-//   const height = parseInt(parameters.height);
-
-//   for (const node of figma.currentPage.selection) {
-//     if ("resize" in node) {
-//       node.resize(width, height);
-//     }
-//   }
-// }

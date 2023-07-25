@@ -1,0 +1,40 @@
+{
+  "name": "styles to variables swap",
+  "id": "1265414931203814032",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "permissions": ["teamlibrary"],
+  "menu": [
+    {
+      "name": "Swap all matches",
+      "command": "swapp-all"
+    },
+    {
+      "name": "Swap by name",
+      "command": "swap-manual",
+      "parameters": [
+        {
+          "name": "Style",
+          "key": "style-name",
+          "description": "Enter a style name you want to swap"
+        },
+        {
+          "name": "Collection",
+          "key": "collection-name",
+          "description": "Enter a variable collection name"
+        },
+        {
+          "name": "Variable",
+          "key": "variable-name",
+          "description": "Enter a variable name"
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,54 @@
+// --------------------------------------
+// UTILS SECTION
+// --------------------------------------
+
+const filterAllowedNodes = (nodes: any[]) => {
+  const filtered = nodes.filter((node: any) => {
+    if (
+      !node.fillStyleId ||
+      typeof node.fillStyleId !== "string" ||
+      node.type === "INSTANCE"
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return filtered;
+};
+
+const successMessage = (successMessage: string) => {
+  figma.notify(successMessage, {
+    timeout: 3000
+  });
+  console.log(successMessage);
+  figma.closePlugin();
+};
+
+const errorMessage = (errorMessage: string) => {
+  figma.notify(errorMessage, {
+    timeout: 3000,
+    error: true
+  });
+  console.log(errorMessage);
+  figma.closePlugin();
+};
+
+// --------------------------------------
+// UNIT SELECTION
+// --------------------------------------
+// in order to run async function we wrap
+// all in a function
+// --------------------------------------
+
 const init = async () => {
+  console.clear();
+
   figma.skipInvisibleInstanceChildren = true;
+  let swappedStylesCount = 0;
 
   let variablesSuggestions: string[] = [];
-  let collection: LibraryVariableCollection | undefined;
 
   const variableCollections =
     await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
@@ -10,36 +56,44 @@ const init = async () => {
   // The 'input' event listens for text change in the Quick Actions box after a plugin is 'Tabbed' into.
   figma.parameters.on(
     "input",
-    async ({ query, key, result }: ParameterInputEvent) => {
+    async ({ query, key, result, parameters }: ParameterInputEvent) => {
       if (query.length === 0) {
         result.setError("The name should be full including slashes");
         return;
       }
 
+      // STYLE NAME
       if (key === "style-name") {
         result.setSuggestions([query]);
       }
 
+      // COLLECTION NAME
       if (key === "collection-name") {
-        collection = variableCollections.find((collection) => {
-          return collection.name === query;
+        const filteredSuggestions = variableCollections
+          .map((collection) => collection.name)
+          .filter((s) => s.includes(query));
+
+        result.setSuggestions(filteredSuggestions);
+      }
+
+      // VARIABLE NAME
+      if (key === "variable-name") {
+        const collection = variableCollections.find((collection) => {
+          return collection.name === parameters["collection-name"];
         });
 
+        // chedk if collection exists
         if (collection === undefined) {
           result.setError("No matching collection found");
           return;
         }
-
-        result.setSuggestions([query]);
 
         await figma.teamLibrary
           .getVariablesInLibraryCollectionAsync(collection.key)
           .then((variables) => {
             variablesSuggestions = variables.map((variable) => variable.name);
           });
-      }
 
-      if (key === "variable-name") {
         const filteredSuggestions = variablesSuggestions.filter((s) =>
           s.includes(query)
         );
@@ -51,8 +105,12 @@ const init = async () => {
 
   // When the user presses Enter after inputting all parameters, the 'run' event is fired.
   figma.on("run", async ({ command, parameters }: RunEvent) => {
-    if (command === "swap-all") {
-      swapAll(parameters as ParameterValues);
+    figma.notify("Swapping styles...", {
+      timeout: 1000
+    });
+
+    if (command === "swap-all-by-page") {
+      await swapAll(parameters as ParameterValues, true);
     }
     if (command === "swap-manual-by-page") {
       await swapManual(parameters as ParameterValues, true);
@@ -65,33 +123,109 @@ const init = async () => {
   //////////////
   // SWAP ALL //
   //////////////
-  const swapAll = (parameters: ParameterValues) => {
-    console.log(parameters);
+  const swapAll = async (
+    parameters: ParameterValues,
+    byPage: boolean = false
+  ) => {
+    // get all node
+    const allNodes = byPage
+      ? figma.currentPage.findAll()
+      : figma.root.findAll();
+
+    const allAllowedNodes = filterAllowedNodes(allNodes);
+
+    const collection = variableCollections.find((collection) => {
+      return collection.name === parameters["collection-name"];
+    });
+
+    if (collection === undefined) {
+      errorMessage("No matching collection found");
+      return;
+    }
+
+    // VARIABLES
+    const variables =
+      await figma.teamLibrary.getVariablesInLibraryCollectionAsync(
+        collection.key
+      );
+
+    console.log("variables", variables);
+    console.log("allAllowedNodes", allAllowedNodes);
+
+    // replace styles with matching variable
+    for (const node of allAllowedNodes) {
+      const styleId = node.fillStyleId;
+
+      if (typeof styleId !== "string") {
+        // Instead of a return statement, continue to the next iteration
+        continue;
+      }
+
+      // console.log("--------------------");
+      // console.log("node", node);
+      // console.log("styleId", styleId);
+
+      const style = figma.getStyleById(styleId);
+      const styleName = style?.name;
+
+      // console.log("style", style);
+      // console.log("styleName", styleName);
+
+      if (styleName === undefined) {
+        // Instead of a return statement, continue to the next iteration
+        continue;
+      }
+
+      const teamVariable = variables.find((variable) => {
+        return variable.name === styleName;
+      });
+
+      if (teamVariable === undefined) {
+        // Instead of a return statement, continue to the next iteration
+        continue;
+      }
+
+      const importedVariable = await figma.variables.importVariableByKeyAsync(
+        teamVariable.key
+      );
+
+      const fillsCopy = JSON.parse(JSON.stringify(node.fills));
+
+      fillsCopy[0] = figma.variables.setBoundVariableForPaint(
+        fillsCopy[0],
+        "color",
+        importedVariable
+      );
+
+      swappedStylesCount++;
+
+      node.fills = await fillsCopy;
+    }
+
+    // SUCCESS
+    successMessage(`Swapped ${swappedStylesCount} styles! 🎉`);
   };
 
   /////////////////
   // MANUAL SWAP //
   /////////////////
   const swapManual = async (parameters: ParameterValues, byPage: boolean) => {
-    const allCurrentPageNodes = figma.currentPage.findAll();
+    console.log("parameters", parameters);
 
-    console.log("allCurrentPageNodes", allCurrentPageNodes);
+    const allNodes = byPage
+      ? figma.currentPage.findAll()
+      : figma.root.findAll();
 
-    const allAllowedNodes = allCurrentPageNodes.filter((node: any) => {
-      if (
-        !node.fillStyleId ||
-        typeof node.fillStyleId !== "string" ||
-        node.type === "INSTANCE"
-      ) {
-        return false;
-      }
-
-      return true;
-    });
+    const allAllowedNodes = filterAllowedNodes(allNodes);
 
     // COLOR STYLES
     const allMatchedColorStyles = allAllowedNodes.filter((node: any) => {
       const styleId = node.fillStyleId;
+
+      if (typeof styleId !== "string") {
+        return false;
+      }
+
       const styleName = figma.getStyleById(styleId)?.name;
 
       return styleName === parameters["style-name"];
@@ -100,10 +234,7 @@ const init = async () => {
     // console.log("allMatchedColorStyles", allMatchedColorStyles);
 
     if (allMatchedColorStyles.length === 0) {
-      figma.notify("No matching styles in the file", {
-        timeout: 3000,
-        error: true
-      });
+      errorMessage("No matching styles in the file");
       return;
     }
 
@@ -113,10 +244,7 @@ const init = async () => {
     });
 
     if (collection === undefined) {
-      figma.notify("No matching collection found", {
-        timeout: 3000,
-        error: true
-      });
+      errorMessage("No matching collection found");
       return;
     }
 
@@ -130,11 +258,8 @@ const init = async () => {
       return variable.name === parameters["variable-name"];
     });
 
+    // formal check
     if (teamVariable === undefined) {
-      figma.notify("No matching variable found", {
-        timeout: 3000,
-        error: true
-      });
       return;
     }
 
@@ -142,12 +267,11 @@ const init = async () => {
       teamVariable.key
     );
 
-    let swappedStylesCount = 0;
-
     allMatchedColorStyles.forEach(async (node: any) => {
       const fillsCopy = JSON.parse(JSON.stringify(node.fills));
 
       // console.log("fillsCopy", fillsCopy);
+      // console.log("swappedStylesCount", swappedStylesCount);
 
       fillsCopy[0] = figma.variables.setBoundVariableForPaint(
         fillsCopy[0],
@@ -156,20 +280,17 @@ const init = async () => {
       );
 
       // console.log("fillsCopy", fillsCopy);
-      console.log("node", node.fills);
-
-      node.fills = await fillsCopy;
+      // console.log("node", node.fills);
 
       swappedStylesCount++;
+
+      node.fills = await fillsCopy;
     });
 
     // SUCCESS
-    const successMessage = `Swapped ${swappedStylesCount} from ${allMatchedColorStyles.length} styles! 🎉`;
-    figma.notify(successMessage, {
-      timeout: 3000
-    });
-    console.log(successMessage);
-    figma.closePlugin();
+    successMessage(
+      `Swapped ${swappedStylesCount} from ${allMatchedColorStyles.length} styles! 🎉`
+    );
   };
 };
 

@@ -12,8 +12,15 @@
   "permissions": ["teamlibrary"],
   "menu": [
     {
-      "name": "Swap all matches",
-      "command": "swap-all"
+      "name": "Swap all matches on page",
+      "command": "swap-all-by-page",
+      "parameters": [
+        {
+          "name": "Collection",
+          "key": "collection-name",
+          "description": "Enter a collection name"
+        }
+      ]
     },
     { "separator": true },
     {
@@ -28,7 +35,7 @@
         {
           "name": "Collection",
           "key": "collection-name",
-          "description": "Enter a variable collection name"
+          "description": "Enter a collection name"
         },
         {
           "name": "Variable",
@@ -49,7 +56,7 @@
         {
           "name": "Collection",
           "key": "collection-name",
-          "description": "Enter a variable collection name"
+          "description": "Enter a collection name"
         },
         {
           "name": "Variable",

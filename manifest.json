@@ -1,5 +1,5 @@
 {
-  "name": "styles to variables swap",
+  "name": "StilTausch ✷ Swap styles with variables",
   "id": "1265414931203814032",
   "api": "1.0.0",
   "main": "code.js",
@@ -12,56 +12,77 @@
   "permissions": ["teamlibrary"],
   "menu": [
     {
-      "name": "Swap all matches on page",
-      "command": "swap-all-by-page",
-      "parameters": [
+      "name": "Swap all",
+      "menu": [
         {
-          "name": "Collection",
-          "key": "collection-name",
-          "description": "Enter a collection name"
+          "name": "Swap all on the page",
+          "command": "swap-all-by-page",
+          "parameters": [
+            {
+              "name": "Collection",
+              "key": "collection-name",
+              "description": "Enter a collection name"
+            }
+          ]
+        },
+        {
+          "name": "Swap all across the file",
+          "command": "swap-all-by-file",
+          "parameters": [
+            {
+              "name": "Collection",
+              "key": "collection-name",
+              "description": "Enter a collection name"
+            }
+          ]
         }
       ]
     },
     { "separator": true },
     {
-      "name": "Manual per page",
-      "command": "swap-manual-by-page",
-      "parameters": [
+      "name": "Swap manually",
+      "menu": [
         {
-          "name": "Style",
-          "key": "style-name",
-          "description": "Enter a style name you want to swap"
+          "name": "Swap manually on the page",
+          "command": "swap-manual-by-page",
+          "parameters": [
+            {
+              "name": "Style",
+              "key": "style-name",
+              "description": "Enter a style name you want to swap"
+            },
+            {
+              "name": "Collection",
+              "key": "collection-name",
+              "description": "Enter a collection name"
+            },
+            {
+              "name": "Variable",
+              "key": "variable-name",
+              "description": "Enter a variable name"
+            }
+          ]
         },
         {
-          "name": "Collection",
-          "key": "collection-name",
-          "description": "Enter a collection name"
-        },
-        {
-          "name": "Variable",
-          "key": "variable-name",
-          "description": "Enter a variable name"
-        }
-      ]
-    },
-    {
-      "name": "Manual per file",
-      "command": "swap-manual-by-file",
-      "parameters": [
-        {
-          "name": "Style",
-          "key": "style-name",
-          "description": "Enter a style name you want to swap"
-        },
-        {
-          "name": "Collection",
-          "key": "collection-name",
-          "description": "Enter a collection name"
-        },
-        {
-          "name": "Variable",
-          "key": "variable-name",
-          "description": "Enter a variable name"
+          "name": "Swap manually across the file",
+          "command": "swap-manual-by-file",
+          "parameters": [
+            {
+              "name": "Style",
+              "key": "style-name",
+              "description": "Enter a style name you want to swap"
+            },
+            {
+              "name": "Collection",
+              "key": "collection-name",
+              "description": "Enter a collection name"
+            },
+            {
+              "name": "Variable",
+              "key": "variable-name",
+              "description": "Enter a variable name"
+            }
+          ]
         }
       ]
     }

@@ -112,6 +112,9 @@ const init = async () => {
     if (command === "swap-all-by-page") {
       await swapAll(parameters as ParameterValues, true);
     }
+    if (command === "swap-all-by-file") {
+      await swapAll(parameters as ParameterValues, false);
+    }
     if (command === "swap-manual-by-page") {
       await swapManual(parameters as ParameterValues, true);
     }
@@ -149,8 +152,8 @@ const init = async () => {
         collection.key
       );
 
-    console.log("variables", variables);
-    console.log("allAllowedNodes", allAllowedNodes);
+    console.log("variables amount", variables.length);
+    console.log("allAllowedNodes amount", allAllowedNodes.length);
 
     // replace styles with matching variable
     for (const node of allAllowedNodes) {

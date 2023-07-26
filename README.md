@@ -1,40 +1,63 @@
-Below are the steps to get your plugin running. You can also find instructions at:
+# StilTausch ✷ Swap styles with variables
 
-  https://www.figma.com/plugin-docs/plugin-quickstart-guide/
+<a href="https://www.figma.com/community/plugin/1265414931203814032" target="_blank">
+<img src="./readme-assets/preview.webp" alt="preview" width="100%">
+</a>
 
-This plugin template uses Typescript and NPM, two standard tools in creating JavaScript applications.
+StilTausch is a [parameter Figma plugin](https://help.figma.com/hc/en-us/articles/4406468726167-Plugin-parameters) that allows you to swap styles with variables.
 
-First, download Node.js which comes with NPM. This will allow you to install TypeScript and other
-libraries. You can find the download link here:
+Here are two basic comands:
 
-  https://nodejs.org/en/download/
+1. **Swap all** — This command will swap all styles with same names.
+2. **Swap manually** — This command will swap styles by their names.
 
-Next, install TypeScript using the command:
+## How it works
 
-  npm install -g typescript
+Install the plugin from the [plugin page](https://www.figma.com/community/plugin/1265414931203814032).
+Because it's a [quick action](https://help.figma.com/hc/en-us/articles/360040328653#Quick_actions) plugin, you can run it from the quick action menu:
 
-Finally, in the directory of your plugin, get the latest type definitions for the plugin API by running:
+- Mac: ⌘ Command / or ⌘ Command P
+- Windows: Control + / or Control + P
 
-  npm install --save-dev @figma/plugin-typings
+### Basic principle
 
-If you are familiar with JavaScript, TypeScript will look very familiar. In fact, valid JavaScript code
-is already valid Typescript code.
+The plugin fetches all collections from a team library that your using in the document and after providing a collection name the plugin will fetch all variables from this collection.
 
-TypeScript adds type annotations to variables. This allows code editors such as Visual Studio Code
-to provide information about the Figma API while you are writing code, as well as help catch bugs
-you previously didn't notice.
+### Usage recommendations
 
-For more information, visit https://www.typescriptlang.org/
+Each command also could be run for the current page only or for the whole document.
+**Note**: In terms of heavy documents with many styles, it could be useful to run the command for the current page only.
 
-Using TypeScript requires a compiler to convert TypeScript (code.ts) into JavaScript (code.js)
-for the browser to run.
+The plugin will skip styles if they are in `INSTANCE` nodes. If you want to swap styles in `INSTANCE` nodes, you need to detach them first or go to the master component and swap styles there.
 
-We recommend writing TypeScript code using Visual Studio code:
+---
 
-1. Download Visual Studio Code if you haven't already: https://code.visualstudio.com/.
-2. Open this directory in Visual Studio Code.
-3. Compile TypeScript to JavaScript: Run the "Terminal > Run Build Task..." menu item,
-    then select "npm: watch". You will have to do this again every time
-    you reopen Visual Studio Code.
+### "Swap all" command
 
-That's it! Visual Studio Code will regenerate the JavaScript file every time you save.
+![swap-all-menu](readme-assets/swap-all-command-menu.webp)
+![swap-all-command](readme-assets/swap-all-command-command.webp)
+
+With this option you can swap all styles with same names. Before the plugin will start to swap styles, it will ask you to select a collection. Just start to type a collection name you want to use and the plugin will show you a list of suggestions. After selecting a collection, hit the `Enter` key and the plugin will start to swap styles.
+
+The plugin will compare variable names from the collection you choose with style names of each node in the document. If the plugin finds a match, it will swap the style with the variable.
+
+---
+
+### "Swap manually" command
+
+![swap-by-name-menu](readme-assets/swap-by-name-command-menu.webp)
+![swap-by-name-command](readme-assets/swap-by-name-command-command.webp)
+
+This command will swap styles by their names. The plugin will ask you to provide:
+
+1. A style name you want to swap.
+2. A collection name from which the plugin will fetch variables.
+3. A variable name you want to use for swapping.
+
+After providing all the information, hit the `Enter` key and the plugin will start to swap styles.
+
+---
+
+## Feedback
+
+If you have any questions or suggestions, feel free leave a comment on the [plugin page](https://www.figma.com/community/plugin/1265414931203814032) or [create an issue](https://github.com/PavelLaptev/StilTausch-Swap-styles-with-variables/issues) on GitHub.

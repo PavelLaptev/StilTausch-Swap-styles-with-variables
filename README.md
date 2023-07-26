@@ -1,8 +1,6 @@
 # StilTausch ✷ Swap styles with variables
 
-<a href="https://www.figma.com/community/plugin/1265414931203814032" target="_blank">
-<img src="./readme-assets/preview.webp" alt="preview" width="100%">
-</a>
+[![Preview](./readme-assets/preview.webp)](https://www.figma.com/community/plugin/1265414931203814032)
 
 StilTausch is a [parameter Figma plugin](https://help.figma.com/hc/en-us/articles/4406468726167-Plugin-parameters) that allows you to swap styles with variables.
 
@@ -29,6 +27,10 @@ Each command also could be run for the current page only or for the whole docume
 **Note**: In terms of heavy documents with many styles, it could be useful to run the command for the current page only.
 
 The plugin will skip styles if they are in `INSTANCE` nodes. If you want to swap styles in `INSTANCE` nodes, you need to detach them first or go to the master component and swap styles there.
+
+_Watch the video below to see how it works:_
+
+[![Watch the video](./readme-assets/video-preview.webp)](https://www.veed.io/view/ce7fff71-3adc-493d-ae4a-82325807de6b?panel=share)
 
 ---
 

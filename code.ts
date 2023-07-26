@@ -109,10 +109,10 @@ const init = async () => {
       timeout: 1000
     });
 
-    if (command === "swap-all-by-page") {
+    if (command === "swap-all-in-page") {
       await swapAll(parameters as ParameterValues, true);
     }
-    if (command === "swap-all-by-file") {
+    if (command === "swap-all-in-file") {
       await swapAll(parameters as ParameterValues, false);
     }
     if (command === "swap-manual-by-page") {

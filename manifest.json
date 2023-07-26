@@ -16,7 +16,7 @@
       "menu": [
         {
           "name": "Swap all on the page",
-          "command": "swap-all-by-page",
+          "command": "swap-all-in-page",
           "parameters": [
             {
               "name": "Collection",
@@ -27,7 +27,7 @@
         },
         {
           "name": "Swap all across the file",
-          "command": "swap-all-by-file",
+          "command": "swap-all-in-file",
           "parameters": [
             {
               "name": "Collection",

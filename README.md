@@ -1,3 +1,5 @@
+# ⚠️ This is an old repo. The new plugin repo is here [github.com/PavelLaptev/stiltausch-ui-plugin](https://github.com/PavelLaptev/stiltausch-ui-plugin)
+
 # StilTausch ✷ Swap Styles with Variables
 
 [![Preview](./readme-assets/preview.webp)](https://www.figma.com/community/plugin/1265414931203814032)
